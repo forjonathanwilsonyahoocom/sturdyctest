@@ -33,7 +33,7 @@ func demonstrateGetOrFetchBatch(cacheClient *sturdyc.Client[int]) {
 
 		return response, nil
 	}
-	batchSize := 1000
+	batchSize := 2000
 	numBatches := 100000
 	numSubsequentCalls := 100
 
