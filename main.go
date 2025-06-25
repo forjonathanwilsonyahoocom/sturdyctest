@@ -22,7 +22,7 @@ func demonstrateGetOrFetchBatch(cacheClient *sturdyc.Client[int]) {
 	fetchFn := func(_ context.Context, ids []string) (map[string]int, error) {
 		count.Add(1)
 		log.Printf("we are requesting: %v\n", ids)
-		time.Sleep(time.Millisecond * 1)
+		//time.Sleep(time.Millisecond * 1)
 
 		response := make(map[string]int, len(ids))
 		for _, id := range ids {
@@ -32,7 +32,7 @@ func demonstrateGetOrFetchBatch(cacheClient *sturdyc.Client[int]) {
 
 		return response, nil
 	}
-	batchSize := 100000
+	batchSize := 10000
 	numBatches := 10000
 
 	batches := make([][]string, numBatches)
@@ -80,7 +80,7 @@ func demonstrateGetOrFetchBatch(cacheClient *sturdyc.Client[int]) {
 
 func main() {
 	// Maximum number of entries in the sturdyc.
-	capacity := 10000
+	capacity := 300000
 	// Number of shards to use for the sturdyc.
 	numShards := 10
 	// Time-to-live for cache entries.
