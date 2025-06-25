@@ -11,5 +11,7 @@ this setup outputs a cpu profile for pprof after running:
 
 go tool pprof -http=localhost:8080  cpu.prof 
 
+as we can see from this chart, most of the time goes into grouping the ids from the batches
+
 ![lolipop guard](./img/cpuprofflame.png "Traffic Guard Instance")
 
