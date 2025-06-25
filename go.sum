@@ -1,0 +1,4 @@
+github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
+github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
+github.com/viccon/sturdyc v1.1.5 h1:GLQDnsyKt3L/tpdWCIARIRefn+5DAyvqu+0irBwt+vk=
+github.com/viccon/sturdyc v1.1.5/go.mod h1:OCBEgG/i48uugKQ498UQlfMHmf5j8MYY8a4BApfVnMo=
