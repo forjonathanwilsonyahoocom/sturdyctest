@@ -2,15 +2,15 @@ package main
 
 import (
 	"context"
+	"github.com/viccon/sturdyc"
 	"log"
 	"math/rand/v2"
+	"os"
+	"runtime/pprof"
 	"strconv"
 	"sync"
 	"sync/atomic"
-  "os"
 	"time"
-  "runtime/pprof"
-	"github.com/viccon/sturdyc"
 )
 
 func pickRandomValue(batches [][]string) string {
@@ -22,7 +22,7 @@ func demonstrateGetOrFetchBatch(cacheClient *sturdyc.Client[int]) {
 	var count atomic.Int32
 	fetchFn := func(_ context.Context, ids []string) (map[string]int, error) {
 		count.Add(1)
-		log.Printf("we are requesting: %v\n", ids)
+		//log.Printf("we are requesting: %v\n", ids)
 		//time.Sleep(time.Millisecond * 1)
 
 		response := make(map[string]int, len(ids))
@@ -35,6 +35,7 @@ func demonstrateGetOrFetchBatch(cacheClient *sturdyc.Client[int]) {
 	}
 	batchSize := 1000
 	numBatches := 100000
+	numSubsequentCalls := 100
 
 	batches := make([][]string, numBatches)
 
@@ -56,7 +57,9 @@ func demonstrateGetOrFetchBatch(cacheClient *sturdyc.Client[int]) {
 	for _, batch := range batches {
 		go func() {
 			res, _ := cacheClient.GetOrFetchBatch(context.Background(), batch, keyPrefixFn, fetchFn)
-			log.Printf("got batch: %v", len(res))
+			if len(res) < batchSize {
+				log.Printf("got batch with unexpected size: %v", len(res))
+			}
 		}()
 	}
 
@@ -65,12 +68,14 @@ func demonstrateGetOrFetchBatch(cacheClient *sturdyc.Client[int]) {
 
 	// Launch another 5 goroutines that are going to pick two random IDs from any of the batches.
 	var wg sync.WaitGroup
-	for i := 0; i < 5; i++ {
+	for i := 0; i < numSubsequentCalls; i++ {
 		wg.Add(1)
 		go func() {
 			ids := []string{pickRandomValue(batches), pickRandomValue(batches), pickRandomValue(batches)}
 			res, _ := cacheClient.GetOrFetchBatch(context.Background(), ids, keyPrefixFn, fetchFn)
-			log.Printf("subsequently got batch: %v", len(res))
+			if len(res) < 3 {
+				log.Printf("subsequently got batch: %v", len(res))
+			}
 			wg.Done()
 		}()
 	}
@@ -81,16 +86,15 @@ func demonstrateGetOrFetchBatch(cacheClient *sturdyc.Client[int]) {
 
 func main() {
 
-		f, err := os.Create("cpu.prof")
-		if err != nil {
-				log.Fatal("could not create CPU profile: ", err)
-		}
-		defer f.Close() // error handling omitted for example
-		if err := pprof.StartCPUProfile(f); err != nil {
-				log.Fatal("could not start CPU profile: ", err)
-		}
-		defer pprof.StopCPUProfile()
-
+	f, err := os.Create("cpu.prof")
+	if err != nil {
+		log.Fatal("could not create CPU profile: ", err)
+	}
+	defer f.Close() // error handling omitted for example
+	if err := pprof.StartCPUProfile(f); err != nil {
+		log.Fatal("could not start CPU profile: ", err)
+	}
+	defer pprof.StopCPUProfile()
 
 	// Maximum number of entries in the sturdyc.
 	capacity := 300000
