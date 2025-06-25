@@ -7,8 +7,9 @@ import (
 	"strconv"
 	"sync"
 	"sync/atomic"
+  "os"
 	"time"
-
+  "runtime/pprof"
 	"github.com/viccon/sturdyc"
 )
 
@@ -32,8 +33,8 @@ func demonstrateGetOrFetchBatch(cacheClient *sturdyc.Client[int]) {
 
 		return response, nil
 	}
-	batchSize := 10000
-	numBatches := 10000
+	batchSize := 1000
+	numBatches := 100000
 
 	batches := make([][]string, numBatches)
 
@@ -79,6 +80,18 @@ func demonstrateGetOrFetchBatch(cacheClient *sturdyc.Client[int]) {
 }
 
 func main() {
+
+		f, err := os.Create("cpu.prof")
+		if err != nil {
+				log.Fatal("could not create CPU profile: ", err)
+		}
+		defer f.Close() // error handling omitted for example
+		if err := pprof.StartCPUProfile(f); err != nil {
+				log.Fatal("could not start CPU profile: ", err)
+		}
+		defer pprof.StopCPUProfile()
+
+
 	// Maximum number of entries in the sturdyc.
 	capacity := 300000
 	// Number of shards to use for the sturdyc.
